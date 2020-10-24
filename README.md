@@ -1,2 +1,2 @@
 # Handwritten-Recognition
-手写体识别四则运算
+基于python的手写体识别四则运算
