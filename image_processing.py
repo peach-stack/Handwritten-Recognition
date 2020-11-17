@@ -55,3 +55,36 @@ def get_x_y_cuts(data, n_lines=1):
                 pr_k += 1
         cuts = new_cuts
     return cuts
+
+# 获取图像中的各个小分割图像的函数，它可以以数据的形式返回，也可以将之以图像的形式保存到磁盘
+# image代表着带分割图像；dir则是图像保存的目的路径
+# is_data表示image是灰度值矩阵还是一个文件名；n_lines表示分割图像中符号的行数
+# data_needed是表示是否需要以数据的形式返回图像的数据集；count是为了方便统计分割符号数量的一个parameter，可忽略
+def get_image_cuts(image, dir=None, is_data=False, n_lines=1, data_needed=False, count=0):
+    if is_data:
+        data = image
+    else:
+        # 灰度处理
+        data = cv2.imread(image, 2)
+        # 获得坐标范围
+    cuts = get_x_y_cuts(data, n_lines=n_lines)
+    image_cuts = None
+    for i, item in enumerate(cuts):
+        count += 1
+        max_dim = max(item[1] - item[0], item[3] - item[2])
+        new_data = np.ones((int(1.4 * max_dim), int(1.4 * max_dim))) * 255
+        x_min, x_max = (max_dim - item[1] + item[0]) // 2, (max_dim - item[1] + item[0]) // 2 + item[1] - item[0]
+        y_min, y_max = (max_dim - item[3] + item[2]) // 2, (max_dim - item[3] + item[2]) // 2 + item[3] - item[2]
+        new_data[int(0.2 * max_dim) + x_min:int(0.2 * max_dim) + x_max, int(0.2 * max_dim) + y_min:int(0.2 * max_dim) + y_max] = data[item[0]:item[1], item[2]:item[3]]
+        standard_data = cv2.resize(new_data, (28, 28))
+        if not data_needed:
+            cv2.imwrite(dir + str(count) + ".jpg", standard_data)
+        if data_needed:
+            data_flat = (255 - np.resize(standard_data, (1, 28 * 28))) / 255
+            if image_cuts is None:
+                image_cuts = data_flat
+            else:
+                image_cuts = np.r_[image_cuts, data_flat]
+    if data_needed:
+        return image_cuts
+    return count
