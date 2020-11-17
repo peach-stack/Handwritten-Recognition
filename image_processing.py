@@ -1,6 +1,11 @@
 # 图像处理
+import numpy as np
 import queue
-
+from tqdm import tqdm
+import cv2
+import os
+from tqdm import tqdm
+import pickle
 #连通域算法进行图片切割
 # 获取图片中各个小分割图像的坐标范围，data代表着待分割图像的灰度值矩阵，n_lines是表示分割图像中符号的行数
 def get_x_y_cuts(data, n_lines=1):
@@ -88,3 +93,14 @@ def get_image_cuts(image, dir=None, is_data=False, n_lines=1, data_needed=False,
     if data_needed:
         return image_cuts
     return count
+# 获得新数据集的图像和标签
+def get_images_labels():
+    images = None
+    labels = None
+    pickle_images = open('../data/images', 'rb')
+    pickle_labels = open('../data/labels', 'rb')
+    images = pickle.load(pickle_images)
+    labels = pickle.load(pickle_labels)
+    pickle_images.close()
+    pickle_labels.close()
+    return images, labels
