@@ -28,7 +28,7 @@ class LearningUI(QWidget):
          定义UI界面：
          三个按钮：学习、识别、清屏
          btn_learn、btn_recognize、btn_clear
-         一个组合框：选择0-9
+         一个组合框：选择0-9 
          combo_table
          两条标签：请在屏幕空白处用鼠标输入0-9中的某一个数字进行识别！
           2017/10/10 by PyLearn
