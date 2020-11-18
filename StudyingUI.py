@@ -10,11 +10,11 @@ class LearningUI(QWidget):
 
         self.__init_ui()
 
-        #设置鼠标踪迹（按下时跟踪移动）
+        #设置只有鼠标按下时才跟踪移动，否则不按的时候也在画画
         self.setMouseTracking(False)
-        #存储鼠标绘画的轨迹点
+        #self.pos_xy保存所有绘画的点
         self.pos_xy = []
-        #pos_x、pos_y分别为x、y轴坐标
+        #设置pos_x、pos_y分别为x、y轴坐标,方便计算
         self.pos_x = []
         self.pos_y = []
 
@@ -28,7 +28,7 @@ class LearningUI(QWidget):
          定义UI界面：
          三个按钮：学习、识别、清屏
          btn_learn、btn_recognize、btn_clear
-         一个组合框：选择0-9 
+         一个组合框：选择0-9
          combo_table
          两条标签：请在屏幕空白处用鼠标输入0-9中的某一个数字进行识别！
           2017/10/10 by PyLearn
@@ -51,17 +51,18 @@ class LearningUI(QWidget):
         self.combo_table = QComboBox(self)
         for i in range(10):
             self.combo_table.addItem("%d" % i)
-        self.combo_table.setGeometry(150, 400, 70, 40)#设定窗口大小（x坐标，y坐标，宽度，高度）
+        #设定窗口大小（x坐标，y坐标，宽度，高度）
+        self.combo_table.setGeometry(150, 400, 70, 40)
 
         #添加两条标签
-        #self.label_head = QLabel('请在屏幕空白处用鼠标输入0-9中的某一个数字进行识别！', self)
-        #self.label_head.move(75, 50)
+        self.label_head = QLabel('请在屏幕空白处用鼠标输入0-9中的某一个数字进行识别！', self)
+        self.label_head.move(75, 50)
         self.label_end = QLabel('by 憨憨小分队', self)
         self.label_end.move(375, 470)
 
-        # 添加一条输出识别结果的标签
+        #添加一条输出识别结果的标签
         self.label_output = QLabel('', self)
-        #设定窗口大小（x坐标，y坐标，宽度，高度）
+        #设定标签大小（x坐标，y坐标，宽度，高度）
         self.label_output.setGeometry(50, 100, 150, 250)
         #设置边框大小、颜色
         self.label_output.setStyleSheet("QLabel{border:1px solid black;}")
@@ -71,7 +72,7 @@ class LearningUI(QWidget):
         self.label_output.setAlignment(Qt.AlignCenter)
 
 
-        #固定了窗体的宽度与高度
+        #固定窗体的宽度与高度
         self.setFixedSize(550, 500)
         #将窗体居中显示
         self.center()
@@ -93,7 +94,8 @@ class LearningUI(QWidget):
         self.move(qt_center.topLeft())
 
     def paintEvent(self, event):
-        '''相邻两个点之间画线，留下鼠标移动轨迹
+        '''
+        相邻两个点之间画线，留下鼠标移动轨迹
 
          首先判断pos_xy列表中是不是至少有两个点了
          然后将pos_xy中第一个点赋值给point_start
@@ -110,11 +112,11 @@ class LearningUI(QWidget):
          画point_start到point_end之间的线
          point_start = point_end
          这样，不断地将相邻两个点之间画线，就能留下鼠标移动轨迹了
-        '''
+         '''
 
         #构造一个钢笔类
         painter = QPainter()
-        #笔的起点
+        #设置笔的起点
         painter.begin(self)
         #设置笔为黑色，实线。
         pen = QPen(Qt.black, 2, Qt.SolidLine)
@@ -145,10 +147,10 @@ class LearningUI(QWidget):
 
     def mouseReleaseEvent(self, event):
         '''
-         重写鼠标按住后松开的事件
-         在每次松开后向pos_xy列表中添加一个断点(-1, -1)
-         然后在绘画时判断一下是不是断点就行了
-         是断点的话就跳过去，不与之前的连续
+        重写鼠标按住后松开的事件
+        在每次松开后向pos_xy列表中添加一个断点(-1, -1)
+        然后在绘画时判断一下是不是断点就行了
+        是断点的话就跳过去，不与之前的连续
         '''
 
         pos_test = (-1, -1)
@@ -169,18 +171,20 @@ class LearningUI(QWidget):
 
         self.update()
 
+    #学习函数
     def btn_learn_on_clicked(self):
         '''
-         需要用到数据库，因此在在子类中实现
+        需要用到数据库，因此在在子类中实现
         '''
     '''pass 是空语句，是为了保持程序结构的完整性。
        pass 不做任何事情，一般用做占位语句。
     '''
     pass
 
+    #识别函数
     def btn_recognize_on_clicked(self):
         '''
-         需要用到数据库，因此在在子类中实现
+        需要用到数据库，因此在在子类中实现
         '''
 
     pass
@@ -188,26 +192,26 @@ class LearningUI(QWidget):
     #清屏函数
     def btn_clear_on_clicked(self):
         '''
-         按下清屏按钮：
-         将列表赋值为空
-         将输出识别结果的标签赋值为空
-         然后刷新界面，重新绘画即可清屏
+        按下清屏按钮：
+        将列表赋值为空
+        将输出识别结果的标签赋值为空
+        然后刷新界面，重新绘画即可清屏
         '''
 
         self.pos_xy = []
         self.pos_x = []
         self.pos_y = []
-        #self.label_output.setText('')
+        self.label_output.setText('')
         self.update()
 
     def get_pos_xy(self):
         '''
-         将手写体在平面上分为9个格子
-         计算每个格子里点的数量
-         然后点的数量转化为占总点数的百分比
-         接着返回一个数组dim[9]
-         横轴依次是min_x、min2_x、max2_x、max_x
-         纵轴依次是min_y、min2_y、max2_y、max_y
+        将手写体在平面上分为9个格子
+        计算每个格子里点的数量
+        然后点的数量转化为占总点数的百分比
+        接着返回一个数组dim[9]
+        横轴依次是min_x、min2_x、max2_x、max_x
+        纵轴依次是min_y、min2_y、max2_y、max_y
         '''
 
         if not self.pos_xy:
@@ -229,40 +233,50 @@ class LearningUI(QWidget):
         max2_y = max_y - dis_y
 
         for i in range(len(self.pos_x)):
+            #第一个格子里点的数量
             if self.pos_y[i] >= min_y and self.pos_y[i] < min2_y:
                 if self.pos_x[i] >= min_x and self.pos_x[i] < min2_x:
                     dim[0] += 1
                     continue
+            #第二个格子里点的数量
             if self.pos_x[i] >= min2_x and self.pos_x[i] < max2_x:
                 dim[1] += 1
                 continue
+            #第三个格子里点的数量
             if self.pos_x[i] >= max2_x and self.pos_x[i] <= max_x:
                 dim[2] += 1
                 continue
+            #第四个格子里点的数量
             elif self.pos_y[i] >= min2_y and self.pos_y[i] < max2_y:
                 if self.pos_x[i] >= min_x and self.pos_x[i] < min2_x:
                     dim[3] += 1
                     continue
+            #第五个格子里点的数量
             if self.pos_x[i] >= min2_x and self.pos_x[i] < max2_x:
                 dim[4] += 1
                 continue
+            #第六个格子里点的数量
             if self.pos_x[i] >= max2_x and self.pos_x[i] <= max_x:
                 dim[5] += 1
                 continue
+            #第七个格子里点的数量
             elif self.pos_y[i] >= max2_y and self.pos_y[i] <= max_y:
                 if self.pos_x[i] >= min_x and self.pos_x[i] < min2_x:
                     dim[6] += 1
                     continue
+            #第八个格子里点的数量
             if self.pos_x[i] >= min2_x and self.pos_x[i] < max2_x:
                 dim[7] += 1
                 continue
+            #第九个格子里点的数量
             if self.pos_x[i] >= max2_x and self.pos_x[i] <= max_x:
                 dim[8] += 1
                 continue
+            #不在格子里的点
             else:
                 pos_count -= 1
             continue
-        # 将数量转化为所占百分比
+        #将数量转化为所占百分比
         for num in dim:
             num = num * 100 // pos_count
 
